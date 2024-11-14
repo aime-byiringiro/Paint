@@ -2,14 +2,18 @@ package edu.tcu.aimebyiringiro.paint
 
 import android.app.Dialog
 import android.content.ContentValues
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.media.Image
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -93,6 +97,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     private fun setUpPathWidthSelector(drawingView: DrawingView) {
         findViewById<ImageView>(R.id.brush_iv).setOnClickListener{
             val dialog = Dialog(this)
@@ -124,47 +130,87 @@ class MainActivity : AppCompatActivity() {
         //dialog.dismiss()
     }
 
+
     private fun setUpBackgroundPicker(backgroundIv: ImageView){
+//        val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()){
+//            it?.let{Glide.with(this).load(it).into(backgroundIv)}
+
         val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()){
-            it?.let{Glide.with(this).load(it).into(backgroundIv)}
+            uri ->
+            if (uri != null) {
+                Log.d("PhotoPicker", "Selected URI: $uri")
+                Glide.with(this).load(uri).into(backgroundIv)
+                backgroundIv.setImageURI(uri)
+            } else {
+                Log.d("PhotoPicker", "No media selected")
+            }
+
         }
+
+        backgroundIv.setOnClickListener{
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+
 //use a listener to launch the sheet
-        pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+
     }
+
+    /**
+     * Shows a progress dialog while the app is saving the image. The function
+     * takes a lambda which is called after the delay.
+     */
+
 
     private fun setUpSave() {
-        //if backgroundIv is null, assign a color to the backgroundIv
-        val dialog = showInProgress()
-        lifecycleScope.launch(Dispatchers.IO) {
-            delay(5000)
-            val bitmap = findViewById<FrameLayout>(R.id.drawing_fl).drawToBitmap()
-            val values = ContentValues().apply {
-                put(
-                    MediaStore.MediaColumns.DISPLAY_NAME,
-                    System.currentTimeMillis().toString().substring(2, 11) + ".jpeg)"
-                )
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM)
+        findViewById<ImageView>(R.id.save_iv).setOnClickListener {
+            val dialog = Dialog(this).apply {
+                setContentView(R.layout.in_progress)
+                setCancelable(false)
+                show()
             }
 
-            contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)?.let {
-                contentResolver.openOutputStream(it).use { stream ->
-                    stream?.let { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream) }
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    // Capture the drawing as a bitmap
+                    val bitmap = findViewById<FrameLayout>(R.id.drawing_view).drawToBitmap()
+
+                    // Define the metadata for saving the image
+                    val values = ContentValues().apply {
+                        put(MediaStore.Images.Media.DISPLAY_NAME, "drawing_${System.currentTimeMillis()}.png")
+                        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                    }
+
+                    // Insert the image into the external content URI
+                    val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+
+                    // Save the bitmap to the OutputStream
+                    uri?.let {
+                        contentResolver.openOutputStream(it)?.use { outputStream ->
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                        }
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        // Dismiss the dialog and show a success message
+                        dialog.dismiss()
+                        if (uri != null) {
+                            Toast.makeText(this@MainActivity, "Image saved successfully!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@MainActivity, "Failed to save image.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        dialog.dismiss()
+                        Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                    Log.e("SaveImage", "Error saving image", e)
                 }
-            }
-            withContext(Dispatchers.Main) {
-                dialog.dismiss()
-                //making the sharing sheet, test whether ur app is free of bugs 
             }
         }
     }
 
-    private fun showInProgress(): Dialog {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.in_progress)
-        dialog.setCancelable(false)
-        dialog.show()
-        return dialog
-    }
+
 
 }
