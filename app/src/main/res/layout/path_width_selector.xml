@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@color/light_gray"
+        android:src="@drawable/path_width"
+        android:layout_margin="10dp"
+        android:contentDescription="@string/small_width"
+        app:layout_constraintBottom_toTopOf="@id/medium_width_iv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/small_width_iv"
+        android:padding="15dp"/>
+
+    <ImageView
+        android:id="@+id/medium_width_iv"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@color/light_gray"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:src="@drawable/path_width_fg"
+        android:contentDescription="@string/medium_width"
+        app:layout_constraintBottom_toTopOf="@id/large_width_iv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/small_width_iv"/>
+
+    <ImageView
+        android:id="@+id/large_width_iv"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@color/light_gray"
+        android:padding="5dp"
+        android:layout_margin="10dp"
+        android:src="@drawable/path_width_fg"
+        android:contentDescription="@string/large_width"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/medium_width_iv"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
