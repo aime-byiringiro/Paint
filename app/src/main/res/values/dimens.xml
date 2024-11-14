@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <dimen name="small_path_width">5dp</dimen >
+    <dimen name="medium_path_width">10dp</dimen >
+    <dimen name="large_path_width">15dp</dimen>
+</resources>

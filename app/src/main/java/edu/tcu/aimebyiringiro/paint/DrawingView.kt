@@ -52,6 +52,10 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs){
         paint.color = color
     }
 
+    fun setPathWidth(width: Float) {
+        path = CustomPath(path.color, width)
+        paint.strokeWidth = width
+    }
 
     fun undoPath(){
         pathList.removeLast()

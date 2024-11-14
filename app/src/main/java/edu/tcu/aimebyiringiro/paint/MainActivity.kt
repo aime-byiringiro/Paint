@@ -99,6 +99,26 @@ class MainActivity : AppCompatActivity() {
             dialog.setContentView(R.layout.path_width_selector)
             dialog.show()
 
+            val smallIv = dialog.findViewById<ImageView>(R.id.small_width_iv)
+            val mediumIv = dialog.findViewById<ImageView>(R.id.medium_width_iv)
+            val largeIv = dialog.findViewById<ImageView>(R.id.large_width_iv)
+
+
+            smallIv.setOnClickListener{
+                drawingView.setPathWidth(resources.getDimension(R.dimen.small_path_width))
+                dialog.dismiss()
+            }
+            mediumIv.setOnClickListener{
+                drawingView.setPathWidth(resources.getDimension(R.dimen.medium_path_width))
+                dialog.dismiss()
+            }
+            largeIv.setOnClickListener{
+                drawingView.setPathWidth(resources.getDimension(R.dimen.large_path_width))
+                dialog.dismiss()
+            }
+
+            //dialog.dismiss()
+
         }
 
         //dialog.dismiss()
