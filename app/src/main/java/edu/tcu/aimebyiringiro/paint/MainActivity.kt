@@ -5,7 +5,6 @@ import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.media.Image
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -31,7 +30,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +40,6 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
                 // Set the selected image as the background using Glide
@@ -51,9 +48,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
             }
         }
-
-
-
         val drawingView = findViewById<DrawingView>(R.id.drawing_view)
         setUpPallet(drawingView)
         setUpPathWidthSelector(drawingView)
@@ -69,37 +63,25 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpPallet(drawingView: DrawingView) {
         val palletLayout: LinearLayout = findViewById(R.id.pallet_ll)
-
-        // Use for loop to set up the color palette
         for (i in 0 until palletLayout.childCount) {
             val colorView = palletLayout.getChildAt(i) as ImageView
-
-            // Use setImageResource for the initial drawable state
             colorView.setImageResource(R.drawable.path_color_normal)
-
-            // Set click listener to handle color selection
             colorView.setOnClickListener {
-                // Reset all color views to normal drawable
                 for (j in 0 until palletLayout.childCount) {
                     val view = palletLayout.getChildAt(j) as ImageView
-                    view.setImageResource(R.drawable.path_color_normal)  // Reset drawable
+                    view.setImageResource(R.drawable.path_color_normal)
                 }
-
-                // Highlight the selected color view
-                colorView.setImageResource(R.drawable.path_color_selected)  // Set selected drawable
-
-                // Access the background color of the selected ImageView and convert it to Int
+                colorView.setImageResource(R.drawable.path_color_selected)
                 val color = when (i) {
-                    0 -> resources.getColor(R.color.black, null)  // Black
-                    1 -> resources.getColor(R.color.red, null)    // Red
-                    2 -> resources.getColor(R.color.green, null)  // Green
-                    3 -> resources.getColor(R.color.blue, null)   // Blue
-                    4 -> resources.getColor(R.color.tcu_purple, null) // Purple
-                    5 -> resources.getColor(R.color.off_white, null) // Off-White
-                    else -> Color.BLACK  // Default color
+                    0 -> resources.getColor(R.color.black, null)
+                    1 -> resources.getColor(R.color.red, null)
+                    2 -> resources.getColor(R.color.green, null)
+                    3 -> resources.getColor(R.color.blue, null)
+                    4 -> resources.getColor(R.color.tcu_purple, null)
+                    5 -> resources.getColor(R.color.off_white, null)
+                    else -> Color.BLACK
                 }
-
-                drawingView.setPathColor(color)  // Update the path color in DrawingView
+                drawingView.setPathColor(color)
             }
         }
     }
@@ -109,20 +91,14 @@ class MainActivity : AppCompatActivity() {
             drawingView.undoPath()
         }
     }
-
-
-
     private fun setUpPathWidthSelector(drawingView: DrawingView) {
         findViewById<ImageView>(R.id.brush_iv).setOnClickListener{
             val dialog = Dialog(this)
             dialog.setContentView(R.layout.path_width_selector)
             dialog.show()
-
             val smallIv = dialog.findViewById<ImageView>(R.id.small_width_iv)
             val mediumIv = dialog.findViewById<ImageView>(R.id.medium_width_iv)
             val largeIv = dialog.findViewById<ImageView>(R.id.large_width_iv)
-
-
             smallIv.setOnClickListener{
                 drawingView.setPathWidth(resources.getDimension(R.dimen.small_path_width))
                 dialog.dismiss()
@@ -135,26 +111,16 @@ class MainActivity : AppCompatActivity() {
                 drawingView.setPathWidth(resources.getDimension(R.dimen.large_path_width))
                 dialog.dismiss()
             }
-
-            //dialog.dismiss()
-
         }
 
-        //dialog.dismiss()
-    }
 
+    }
     private fun setUpGalleryPicker( pickImageLauncher: ActivityResultLauncher<String>) {
         findViewById<ImageView>(R.id.gallery_iv).setOnClickListener {
             pickImageLauncher.launch("image/*")
-
         }
     }
-
-
     private fun setUpBackgroundPicker(backgroundIv: ImageView){
-//        val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()){
-//            it?.let{Glide.with(this).load(it).into(backgroundIv)}
-
         val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()){
             uri ->
             if (uri != null) {
@@ -164,23 +130,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Log.d("PhotoPicker", "No media selected")
             }
-
         }
-
         backgroundIv.setOnClickListener{
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
-
-//use a listener to launch the sheet
-
     }
-
-    /**
-     * Shows a progress dialog while the app is saving the image. The function
-     * takes a lambda which is called after the delay.
-     */
-
-
     private fun setUpSave() {
         findViewById<ImageView>(R.id.save_iv).setOnClickListener {
             val dialog = Dialog(this).apply {
@@ -188,49 +142,34 @@ class MainActivity : AppCompatActivity() {
                 setCancelable(false)
                 show()
             }
-
             lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    // Capture the drawing as a bitmap
-                    val bitmap = findViewById<FrameLayout>(R.id.drawing_view).drawToBitmap()
-
-                    // Define the metadata for saving the image
-                    val values = ContentValues().apply {
-                        put(MediaStore.Images.Media.DISPLAY_NAME, "drawing_${System.currentTimeMillis()}.png")
-                        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                        put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                val bitmap = findViewById<FrameLayout>(R.id.drawing_view).drawToBitmap()
+                val values = ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, "drawing_${System.currentTimeMillis()}.png")
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                }
+                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                uri?.let {
+                    contentResolver.openOutputStream(it)?.use { outputStream ->
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                     }
-
-                    // Insert the image into the external content URI
-                    val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-
-                    // Save the bitmap to the OutputStream
+                }
+                withContext(Dispatchers.Main) {
+                    dialog.dismiss()
                     uri?.let {
-                        contentResolver.openOutputStream(it)?.use { outputStream ->
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                        }
+                        shareImage(it)
                     }
-
-                    withContext(Dispatchers.Main) {
-                        // Dismiss the dialog and show a success message
-                        dialog.dismiss()
-                        if (uri != null) {
-                            Toast.makeText(this@MainActivity, "Image saved successfully!", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(this@MainActivity, "Failed to save image.", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        dialog.dismiss()
-                        Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-                    Log.e("SaveImage", "Error saving image", e)
                 }
             }
         }
     }
-
-
+    private fun shareImage(uri: android.net.Uri) {
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            putExtra(Intent.EXTRA_STREAM, uri)
+            type = "image/png"
+        }
+        startActivity(shareIntent)
+    }
 
 }
