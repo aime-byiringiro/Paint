@@ -42,7 +42,6 @@ class MainActivity : AppCompatActivity() {
         }
         val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
-                // Set the selected image as the background using Glide
                 Glide.with(this).load(it).into(findViewById<ImageView>(R.id.background_iv))
             } ?: run {
                 Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
