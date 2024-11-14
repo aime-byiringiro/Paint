@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +43,17 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                // Set the selected image as the background using Glide
+                Glide.with(this).load(it).into(findViewById<ImageView>(R.id.background_iv))
+            } ?: run {
+                Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
+
         val drawingView = findViewById<DrawingView>(R.id.drawing_view)
         setUpPallet(drawingView)
         setUpPathWidthSelector(drawingView)
@@ -49,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         setUpBackgroundPicker(backgroundIv)
         setUpUndo(drawingView)
         setUpSave()
+        setUpGalleryPicker(pickImageLauncher)
         findViewById<ImageView>(R.id.undo_iv).setOnClickListener{
             drawingView.undoPath()
         }
@@ -128,6 +141,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         //dialog.dismiss()
+    }
+
+    private fun setUpGalleryPicker( pickImageLauncher: ActivityResultLauncher<String>) {
+        findViewById<ImageView>(R.id.gallery_iv).setOnClickListener {
+            pickImageLauncher.launch("image/*")
+
+        }
     }
 
 
